@@ -1,10 +1,8 @@
-<!--https://github.com/AndreyGermanov/yolov8_onnx_javascript/blob/main/index.html-->
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>YOLOv8 ONNX js</title>
+    <title>YOLOv8 Tensorflow.js</title>
     <style>
       canvas {
         display: block;
@@ -12,12 +10,14 @@
         margin-top: 10px;
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.17.0/dist/tf-backend-wasm.min.js"></script>
   </head>
   <body>
     <input id="uploadInput" type="file" />
     <canvas></canvas>
     <script>
+      tf.setBackend("wasm");
       const input = document.getElementById("uploadInput");
       input.addEventListener("change", async (event) => {
         const boxes = await detect_objects_on_image(event.target.files[0]);
@@ -65,27 +65,18 @@
             const context = canvas.getContext("2d");
             context.drawImage(img, 0, 0, 640, 640);
             const imgData = context.getImageData(0, 0, 640, 640);
-            const pixels = imgData.data;
-
-            const red = [],
-              green = [],
-              blue = [];
-            for (let index = 0; index < pixels.length; index += 4) {
-              red.push(pixels[index] / 255.0);
-              green.push(pixels[index + 1] / 255.0);
-              blue.push(pixels[index + 2] / 255.0);
-            }
-            const input = [...red, ...green, ...blue];
-            resolve([input, img_width, img_height]);
+            resolve([imgData, img_width, img_height]);
           };
         });
       }
 
       async function run_model(input) {
-        const model = await ort.InferenceSession.create("rps_best_uint8.onnx");
-        input = new ort.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
-        const outputs = await model.run({ images: input });
-        return outputs["output0"].data;
+        tf_img = tf.browser.fromPixels(input);
+        input = tf_img.div(255.0).expandDims().toFloat();
+        console.log("input", input.shape);
+        const model = await tf.loadGraphModel("./model/model.json");
+        const outputs = await model.predict(input);
+        return outputs.dataSync();
       }
 
       function iou(box1, box2) {
