@@ -7,7 +7,8 @@ let model = null;
 tf.setBackend("wasm").then(async () => {
   model = await tf.loadGraphModel("./model/model.json");
   console.log("model", model);
-  postMessage({ type: "modelLoaded" });
+  const threadsCount = tf.wasm.getThreadsCount();
+  postMessage({ type: "modelLoaded", threadsCount });
 });
 
 async function run_model(input) {
