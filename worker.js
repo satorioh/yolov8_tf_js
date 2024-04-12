@@ -1,13 +1,11 @@
 importScripts(
-  "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js",
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js",
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.17.0/dist/tf-backend-wasm.min.js",
 );
 
 let model = null;
-ort.InferenceSession.create("./rps_best_uint8.onnx", {
-  executionProviders: ["wasm"],
-  graphOptimizationLevel: "all",
-}).then((res) => {
-  model = res;
+tf.setBackend("wasm").then(async () => {
+  model = await tf.loadGraphModel("./model/model.json");
   console.log("model", model);
   postMessage({ type: "modelLoaded" });
 });
@@ -16,9 +14,10 @@ async function run_model(input) {
   if (!model) {
     model = await model;
   }
-  input = new ort.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
-  const outputs = await model.run({ images: input });
-  return outputs["output0"].data;
+  tf_img = tf.browser.fromPixels(input);
+  input = tf_img.div(255.0).expandDims().toFloat();
+  const outputs = await model.predict(input);
+  return outputs.dataSync();
 }
 
 onmessage = async (event) => {

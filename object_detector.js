@@ -74,17 +74,7 @@ function prepare_input(img) {
   canvas.height = 640;
   const context = canvas.getContext("2d");
   context.drawImage(img, 0, 0, 640, 640);
-
-  const data = context.getImageData(0, 0, 640, 640).data;
-  const red = [],
-    green = [],
-    blue = [];
-  for (let index = 0; index < data.length; index += 4) {
-    red.push(data[index] / 255);
-    green.push(data[index + 1] / 255);
-    blue.push(data[index + 2] / 255);
-  }
-  return [...red, ...green, ...blue];
+  return context.getImageData(0, 0, 640, 640);
 }
 
 function process_output(output, img_width, img_height) {
