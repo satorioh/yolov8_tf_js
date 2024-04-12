@@ -8,6 +8,7 @@ let busy = false;
 let inferCount = 0;
 let totalInferTime = 0;
 let threadsCount = 0;
+let device = "";
 
 window.navigator.mediaDevices
   .getUserMedia({ video: true })
@@ -55,6 +56,7 @@ worker.onmessage = (event) => {
     document.getElementById("loading").style.display = "none";
     document.getElementById("btn-group").style.display = "block";
     threadsCount = output.threadsCount;
+    device = output.device;
   } else if (output.type === "modelResult") {
     const endTime = performance.now(); // 记录结束时间
     const inferTime = endTime - output.startTime; // 计算执行时间
@@ -157,4 +159,5 @@ function draw_boxes(canvas, boxes) {
     40,
   );
   ctx.fillText(`Threads count: ${threadsCount}`, 10, 60);
+  ctx.fillText(`Device: ${device}`, 10, 80);
 }

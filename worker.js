@@ -1,14 +1,25 @@
 importScripts(
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js",
+  "./lib/tf.min.js",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.17.0/dist/tf-backend-wasm.min.js",
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@4.17.0/dist/tf-backend-webgpu.min.js",
 );
 
+let device = "wasm";
 let model = null;
-tf.setBackend("wasm").then(async () => {
+
+if (navigator.gpu) device = "webgpu";
+tf.setBackend(device).then(async () => {
   model = await tf.loadGraphModel("./model/model.json");
   console.log("model", model);
-  const threadsCount = tf.wasm.getThreadsCount();
-  postMessage({ type: "modelLoaded", threadsCount });
+  let threadsCount = 0;
+  if (device === "wasm") {
+    try {
+      threadsCount = tf.wasm.getThreadsCount();
+    } catch (e) {
+      console.log("Error", e);
+    }
+  }
+  postMessage({ type: "modelLoaded", threadsCount, device });
 });
 
 async function run_model(input) {
