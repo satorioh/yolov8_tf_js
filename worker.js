@@ -1,26 +1,41 @@
 importScripts(
-  "./lib/tf.min.js",
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.17.0/dist/tf-backend-wasm.min.js",
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@4.17.0/dist/tf-backend-webgpu.min.js",
+  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf.min.js",
+  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf-backend-wasm.min.js",
+  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf-backend-webgpu.min.js",
 );
 
 let device = "wasm";
 let model = null;
 
-if (navigator.gpu) device = "webgpu";
-tf.setBackend(device).then(async () => {
-  model = await tf.loadGraphModel("./model/model.json");
-  console.log("model", model);
+async function init() {
+  if (navigator.gpu && (await navigator.gpu.requestAdapter())) {
+    device = "webgpu";
+  } else {
+    tf.wasm.setWasmPaths(
+      "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/wasm/",
+    );
+  }
+  load_model();
+}
+
+init();
+
+async function load_model() {
+  await tf.setBackend(device);
+  model = await tf.loadGraphModel(
+    "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/model/model.json",
+  );
+  console.log("model loaded", model);
   let threadsCount = 0;
   if (device === "wasm") {
     try {
       threadsCount = tf.wasm.getThreadsCount();
     } catch (e) {
-      console.log("Error", e);
+      console.log("getThreadsCount Error", e);
     }
   }
   postMessage({ type: "modelLoaded", threadsCount, device });
-});
+}
 
 async function run_model(input) {
   if (!model) {
