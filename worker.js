@@ -44,7 +44,7 @@ async function run_model(input) {
   tf_img = tf.browser.fromPixels(input);
   input = tf_img.div(255.0).expandDims().toFloat();
   const outputs = await model.predict(input);
-  return outputs.dataSync();
+  return outputs.data();
 }
 
 onmessage = async (event) => {
