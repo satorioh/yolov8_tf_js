@@ -1,7 +1,7 @@
 importScripts(
-  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf.min.js",
-  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf-backend-wasm.min.js",
-  "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/lib/tf-backend-webgpu.min.js",
+  "./lib/tf.min.js",
+  "./lib/tf-backend-wasm.min.js",
+  "./lib/tf-backend-webgpu.min.js",
 );
 
 let device = "wasm";
