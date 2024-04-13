@@ -148,7 +148,7 @@ function draw_boxes(canvas, boxes) {
   });
 
   // 绘制 Infer count 和 Average infer time
-  ctx.font = "16px Arial";
+  ctx.font = "26px Arial";
   ctx.fillStyle = "#e11d1d";
   ctx.fillText(`Infer count: ${inferCount}`, 10, 20);
   ctx.fillText(
