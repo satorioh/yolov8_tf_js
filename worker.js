@@ -23,7 +23,7 @@ init();
 async function load_model() {
   await tf.setBackend(device);
   model = await tf.loadGraphModel(
-    "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/model/model.json",
+    "https://regulussig.s3.ap-southeast-1.amazonaws.com/tfjs/model/rps/model.json",
   );
   console.log("model loaded", model);
   let threadsCount = 0;
